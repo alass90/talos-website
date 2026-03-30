@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useMobile } from "@/hooks/useMobile";
 import { translations, Language } from "@/lib/translations";
 import * as Icons from "lucide-react";
 
@@ -25,6 +26,8 @@ export default function Home() {
   const [popupEmail, setPopupEmail] = useState("");
   const [popupLoading, setPopupLoading] = useState(false);
   const [popupError, setPopupError] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isMobile = useMobile(768);
 
   const handlePopupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +89,6 @@ export default function Home() {
     }
   };
 
-
   return (
     <div style={{ background: "#fff", color: "#1a1a1a", fontFamily: "'Inter', sans-serif", fontWeight: 400, fontSize: "15px", lineHeight: 1.6 }}>
       {/* Navigation */}
@@ -96,136 +98,286 @@ export default function Home() {
           top: 0,
           left: 0,
           right: 0,
-          zIndex: 200,
-          height: "56px",
+          zIndex: 500,
+          height: "64px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 40px",
+          padding: isMobile ? "0 20px" : "0 40px",
           background: "rgba(255,255,255,0.92)",
           backdropFilter: "blur(12px)",
           borderBottom: "1px solid #f0f0f0",
         }}
       >
         <div style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ fontWeight: 800, fontSize: "22px", color: "#1a1a1a", letterSpacing: "-0.04em", cursor: "pointer" }}>
+          <span
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            style={{ fontWeight: 800, fontSize: "22px", color: "#1a1a1a", letterSpacing: "-0.04em", cursor: "pointer" }}
+          >
             Talos
           </span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "28px" }}>
-          <a href="#features" style={{ fontSize: "13px", color: "#666", textDecoration: "none", fontWeight: 400 }}>
-            {t.nav.features}
-          </a>
-          <a href="#connectors" style={{ fontSize: "13px", color: "#666", textDecoration: "none", fontWeight: 400 }}>
-            {t.nav.connectors}
-          </a>
-          <a href="#how" style={{ fontSize: "13px", color: "#666", textDecoration: "none", fontWeight: 400 }}>
-            {t.nav.howItWorks}
-          </a>
+
+        {isMobile ? (
           <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: "#1a1a1a", padding: "8px" }}
+          >
+            {mobileMenuOpen ? <Icons.X size={24} /> : <Icons.Menu size={24} />}
+          </button>
+        ) : (
+          <div style={{ display: "flex", alignItems: "center", gap: "28px" }}>
+            <a href="#features" style={{ fontSize: "13px", color: "#666", textDecoration: "none", fontWeight: 400 }}>
+              {t.nav.features}
+            </a>
+            <a href="#connectors" style={{ fontSize: "13px", color: "#666", textDecoration: "none", fontWeight: 400 }}>
+              {t.nav.connectors}
+            </a>
+            <a href="#how" style={{ fontSize: "13px", color: "#666", textDecoration: "none", fontWeight: 400 }}>
+              {t.nav.howItWorks}
+            </a>
+            <button
+              onClick={() => setShowWaitlistPopup(true)}
+              style={{
+                background: "#1a1a1a",
+                color: "#fff",
+                border: "none",
+                padding: "7px 18px",
+                borderRadius: "6px",
+                fontSize: "13px",
+                fontWeight: 500,
+                cursor: "pointer",
+                fontFamily: "'Inter', sans-serif",
+                transition: "opacity .2s",
+              }}
+            >
+              {t.nav.joinWaitlist}
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "16px" }}>
+              {(["EN", "FR", "TR"] as Language[]).map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => setActiveLang(lang)}
+                  style={{
+                    background: activeLang === lang ? "#1a1a1a" : "transparent",
+                    color: activeLang === lang ? "#fff" : "#888",
+                    border: activeLang === lang ? "1px solid #1a1a1a" : "1px solid #e0e0e0",
+                    borderRadius: "5px",
+                    padding: "3px 8px",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all .2s",
+                  }}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Menu Overlay */}
+        {isMobile && mobileMenuOpen && (
+          <div
             style={{
-              background: "#1a1a1a",
-              color: "#fff",
-              border: "none",
-              padding: "7px 18px",
-              borderRadius: "6px",
-              fontSize: "13px",
-              fontWeight: 500,
-              cursor: "pointer",
-              fontFamily: "'Inter', sans-serif",
-              transition: "opacity .2s",
+              position: "fixed",
+              top: "64px",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "#fff",
+              zIndex: 499,
+              padding: "40px 24px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "24px",
+              animation: "mobileMenuSlideIn 0.3s ease-out forwards",
             }}
           >
-            {t.nav.joinWaitlist}
-          </button>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "16px" }}>
-            {(["EN", "FR", "TR"] as Language[]).map((lang) => (
-              <button
-                key={lang}
-                onClick={() => setActiveLang(lang)}
-                style={{
-                  background: activeLang === lang ? "#1a1a1a" : "transparent",
-                  color: activeLang === lang ? "#fff" : "#888",
-                  border: activeLang === lang ? "1px solid #1a1a1a" : "1px solid #e0e0e0",
-                  borderRadius: "5px",
-                  padding: "4px 9px",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  fontFamily: "'Inter', sans-serif",
-                  transition: "all .15s",
-                  letterSpacing: ".04em",
-                }}
-              >
-                {lang}
-              </button>
-            ))}
+            <a
+              href="#features"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ fontSize: "20px", fontWeight: 600, color: "#1a1a1a", textDecoration: "none" }}
+            >
+              {t.nav.features}
+            </a>
+            <a
+              href="#connectors"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ fontSize: "20px", fontWeight: 600, color: "#1a1a1a", textDecoration: "none" }}
+            >
+              {t.nav.connectors}
+            </a>
+            <a
+              href="#how"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ fontSize: "20px", fontWeight: 600, color: "#1a1a1a", textDecoration: "none" }}
+            >
+              {t.nav.howItWorks}
+            </a>
+            <div style={{ padding: "20px 0", borderTop: "1px solid #f0f0f0", display: "flex", gap: "10px" }}>
+              {(["EN", "FR", "TR"] as Language[]).map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => {
+                    setActiveLang(lang);
+                    setMobileMenuOpen(false);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: "12px",
+                    borderRadius: "8px",
+                    background: activeLang === lang ? "#1a1a1a" : "#f5f5f5",
+                    color: activeLang === lang ? "#fff" : "#666",
+                    border: "none",
+                    fontWeight: 600,
+                    fontSize: "14px",
+                  }}
+                >
+                  {lang === "EN" ? "English" : lang === "FR" ? "Français" : "Türkçe"}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => {
+                setShowWaitlistPopup(true);
+                setMobileMenuOpen(false);
+              }}
+              style={{
+                background: "#1a1a1a",
+                color: "#fff",
+                border: "none",
+                padding: "16px",
+                borderRadius: "10px",
+                fontSize: "16px",
+                fontWeight: 600,
+                cursor: "pointer",
+                marginTop: "auto",
+              }}
+            >
+              {t.nav.joinWaitlist}
+            </button>
           </div>
-        </div>
+        )}
       </nav>
 
       {/* Hero Section */}
-      <section style={{ paddingTop: "96px", paddingBottom: "60px", textAlign: "center", maxWidth: "720px", margin: "0 auto", paddingLeft: "24px", paddingRight: "24px" }}>
-        <h1 style={{ fontSize: "clamp(32px,5vw,52px)", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.1, color: "#1a1a1a", marginBottom: "16px" }}>
-          Talos
+      <section
+        style={{
+          padding: isMobile ? "120px 24px 60px" : "160px 40px 100px",
+          textAlign: "center",
+          maxWidth: "1200px",
+          margin: "0 auto",
+        }}
+      >
+        <h1
+          style={{
+            fontSize: isMobile ? "clamp(32px, 10vw, 42px)" : "clamp(48px, 6vw, 72px)",
+            fontWeight: 800,
+            letterSpacing: "-.04em",
+            lineHeight: 1.05,
+            color: "#1a1a1a",
+            marginBottom: "24px",
+          }}
+        >
+          {t.hero.tagline}
         </h1>
-        <h2 style={{ fontSize: "clamp(32px,5vw,52px)", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.1, color: "#1a1a1a", marginBottom: "16px" }}>
-          <span style={{ color: "#666", fontWeight: 300 }}>{t.hero.tagline}</span>
-        </h2>
-        <p style={{ fontSize: "16px", color: "#666", lineHeight: 1.7, maxWidth: "560px", margin: "0 auto 32px", fontWeight: 400 }}>
+        <p
+          style={{
+            fontSize: isMobile ? "16px" : "20px",
+            color: "#666",
+            lineHeight: 1.6,
+            maxWidth: "640px",
+            margin: "0 auto 40px",
+          }}
+        >
           {t.hero.description}
         </p>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
-          <button
-            onClick={() => setShowWaitlistPopup(true)}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "16px",
+          }}
+        >
+          <form
+            onSubmit={handleSubmit}
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              background: "#1a1a1a",
-              color: "#fff",
-              border: "none",
-              padding: "12px 28px",
-              borderRadius: "8px",
-              fontSize: "15px",
-              fontWeight: 500,
-              cursor: "pointer",
-              fontFamily: "'Inter', sans-serif",
-              transition: "opacity .2s",
-              textDecoration: "none",
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              width: isMobile ? "100%" : "auto",
+              gap: "12px",
             }}
           >
-            {t.hero.cta}
-          </button>
+            <input
+              type="email"
+              placeholder={t.cta.placeholder}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{
+                width: isMobile ? "100%" : "320px",
+                padding: "14px 20px",
+                borderRadius: "10px",
+                border: "1px solid #e0e0e0",
+                fontSize: "15px",
+                outline: "none",
+                fontFamily: "'Inter', sans-serif",
+              }}
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                background: "#1a1a1a",
+                color: "#fff",
+                border: "none",
+                padding: "14px 28px",
+                borderRadius: "10px",
+                fontSize: "15px",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "opacity .2s",
+                opacity: loading ? 0.7 : 1,
+              }}
+            >
+              {loading ? "..." : t.hero.cta}
+            </button>
+          </form>
         </div>
-        <p style={{ fontSize: "12px", color: "#aaa", textAlign: "center" }}>
-          Launching April 2026 · Access in order of registration
+        {errorMsg && (
+          <p style={{ color: "#ff4d4d", fontSize: "14px", marginTop: "12px", fontWeight: 500 }}>{errorMsg}</p>
+        )}
+        <p style={{ fontSize: "13px", color: "#999", marginTop: "24px" }}>
+          {t.hero.launchInfo}
         </p>
       </section>
 
       {/* Hero Video Section */}
-      <section style={{ maxWidth: "1080px", margin: "48px auto 0", padding: "0 24px" }}>
+      <section style={{ maxWidth: "1080px", margin: "48px auto 0", padding: isMobile ? "0 20px" : "0 40px" }}>
         <video
           src="https://d2xsxph8kpxj0f.cloudfront.net/310519663472662437/R5T29qL58Covc8v8X9wTZt/VideoProject_df988847.mp4"
           autoPlay
           loop
           muted
           playsInline
-          style={{ width: "100%", height: "auto", display: "block", borderRadius: "14px" }}
+          style={{ width: "100%", height: "auto", display: "block", borderRadius: "14px", boxShadow: "0 20px 50px rgba(0,0,0,0.1)" }}
         />
       </section>
 
       {/* Features Section */}
-      <section id="features" style={{ maxWidth: "1080px", margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
-        <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 700, letterSpacing: "-.03em", lineHeight: 1.1, color: "#1a1a1a", marginBottom: "14px" }}>
+      <section id="features" style={{ maxWidth: "1080px", margin: "0 auto", padding: isMobile ? "60px 24px" : "100px 40px", textAlign: "center" }}>
+        <h2 style={{ fontSize: isMobile ? "28px" : "40px", fontWeight: 700, letterSpacing: "-.03em", lineHeight: 1.1, color: "#1a1a1a", marginBottom: "16px" }}>
           {t.features.title}
         </h2>
-        <p style={{ fontSize: "15px", color: "#666", lineHeight: 1.7, maxWidth: "560px", margin: "0 auto 64px" }}>
+        <p style={{ fontSize: "16px", color: "#666", lineHeight: 1.7, maxWidth: "600px", margin: "0 auto 64px" }}>
           {t.features.subtitle}
         </p>
 
-        {/* Row 1: Create (image left) + Analyze (image right) */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "24px" }}>
+        {/* Row 1: Create + Analyze */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "24px", marginBottom: "24px" }}>
           {[
             { badge: t.features.create.badge, title: t.features.create.title, desc: t.features.create.desc, img: "https://d2xsxph8kpxj0f.cloudfront.net/310519663472662437/R5T29qL58Covc8v8X9wTZt/Untitleddesign(9)_f3b424d9.webp" },
             { badge: t.features.analyze.badge, title: t.features.analyze.title, desc: t.features.analyze.desc, img: "https://d2xsxph8kpxj0f.cloudfront.net/310519663472662437/R5T29qL58Covc8v8X9wTZt/Untitleddesign(8)_a666b439.webp" },
@@ -234,7 +386,7 @@ export default function Home() {
               <div style={{ overflow: "hidden" }}>
                 <img src={item.img} alt={item.title} style={{ width: "100%", height: "260px", objectFit: "cover", display: "block" }} />
               </div>
-              <div style={{ padding: "36px 40px 44px" }}>
+              <div style={{ padding: "36px 40px 44px", textAlign: "left" }}>
                 <div style={{ display: "inline-flex", alignItems: "center", background: "#f0f0ee", border: "1px solid #e4e4e0", borderRadius: "20px", padding: "4px 12px", fontSize: "11px", color: "#666", fontWeight: 500, marginBottom: "16px", letterSpacing: ".02em" }}>{item.badge}</div>
                 <h3 style={{ fontSize: "20px", fontWeight: 700, letterSpacing: "-.02em", color: "#1a1a1a", marginBottom: "10px", lineHeight: 1.2 }}>{item.title}</h3>
                 <p style={{ fontSize: "14px", color: "#666", lineHeight: 1.7 }}>{item.desc}</p>
@@ -244,8 +396,7 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Row 2: Computer Use (wide with image) + two small cards stacked */}
-        {/* Row 2a: Browser Use full width */}
+        {/* Row 2: Browser use full width */}
         <div style={{ border: "1px solid #ebebeb", borderRadius: "14px", padding: "36px 40px 40px", background: "#fff", textAlign: "left", marginBottom: "24px" }}>
           <div style={{ display: "inline-flex", alignItems: "center", background: "#f0f0ee", border: "1px solid #e4e4e0", borderRadius: "20px", padding: "4px 12px", fontSize: "11px", color: "#666", fontWeight: 500, marginBottom: "16px", letterSpacing: ".02em" }}>{t.features.browser.badge}</div>
           <h3 style={{ fontSize: "20px", fontWeight: 700, letterSpacing: "-.02em", color: "#1a1a1a", marginBottom: "10px", lineHeight: 1.2 }}>{t.features.browser.title}</h3>
@@ -253,22 +404,22 @@ export default function Home() {
           <button style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "transparent", border: "1.5px solid #d0d0d0", borderRadius: "8px", padding: "9px 18px", fontSize: "13px", fontWeight: 500, color: "#1a1a1a", cursor: "pointer", marginTop: "20px" }}>{t.features.button}</button>
         </div>
 
-        {/* Row 2b: Computer Use + Automate side by side */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "24px" }}>
-          {/* Computer Use — with image */}
+        {/* Row 3: Computer Use + Automate */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "24px", marginBottom: "24px" }}>
+          {/* Computer Use */}
           <div style={{ border: "1px solid #ebebeb", borderRadius: "14px", overflow: "hidden", display: "flex", flexDirection: "column", background: "#fff" }}>
-            <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663472662437/R5T29qL58Covc8v8X9wTZt/Untitleddesign(11)_e3fb2baf.webp" alt="Computer Use" style={{ width: "100%", height: "240px", objectFit: "cover", display: "block", flexShrink: 0 }} />
-            <div style={{ padding: "32px 40px 40px", flex: 1 }}>
+            <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663472662437/R5T29qL58Covc8v8X9wTZt/Untitleddesign(11)_e3fb2baf.webp" alt="Computer Use" style={{ width: "100%", height: "240px", objectFit: "cover", display: "block" }} />
+            <div style={{ padding: "32px 40px 40px", flex: 1, textAlign: "left" }}>
               <div style={{ display: "inline-flex", alignItems: "center", background: "#f0f0ee", border: "1px solid #e4e4e0", borderRadius: "20px", padding: "4px 12px", fontSize: "11px", color: "#666", fontWeight: 500, marginBottom: "16px", letterSpacing: ".02em" }}>{t.features.computer.badge}</div>
               <h3 style={{ fontSize: "20px", fontWeight: 700, letterSpacing: "-.02em", color: "#1a1a1a", marginBottom: "10px", lineHeight: 1.2 }}>{t.features.computer.title}</h3>
               <p style={{ fontSize: "14px", color: "#666", lineHeight: 1.7 }}>{t.features.computer.desc}</p>
               <button style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "transparent", border: "1.5px solid #d0d0d0", borderRadius: "8px", padding: "9px 18px", fontSize: "13px", fontWeight: 500, color: "#1a1a1a", cursor: "pointer", marginTop: "20px" }}>{t.features.button}</button>
             </div>
           </div>
-          {/* Automate — with image */}
+          {/* Automate */}
           <div style={{ border: "1px solid #ebebeb", borderRadius: "14px", overflow: "hidden", display: "flex", flexDirection: "column", background: "#fff" }}>
-            <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663472662437/R5T29qL58Covc8v8X9wTZt/Untitleddesign(12)_a974e466.webp" alt="Automation" style={{ width: "100%", height: "240px", objectFit: "cover", display: "block", flexShrink: 0 }} />
-            <div style={{ padding: "32px 40px 40px", flex: 1 }}>
+            <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663472662437/R5T29qL58Covc8v8X9wTZt/Untitleddesign(12)_a974e466.webp" alt="Automation" style={{ width: "100%", height: "240px", objectFit: "cover", display: "block" }} />
+            <div style={{ padding: "32px 40px 40px", flex: 1, textAlign: "left" }}>
               <div style={{ display: "inline-flex", alignItems: "center", background: "#f0f0ee", border: "1px solid #e4e4e0", borderRadius: "20px", padding: "4px 12px", fontSize: "11px", color: "#666", fontWeight: 500, marginBottom: "16px", letterSpacing: ".02em" }}>{t.features.automate.badge}</div>
               <h3 style={{ fontSize: "20px", fontWeight: 700, letterSpacing: "-.02em", color: "#1a1a1a", marginBottom: "10px", lineHeight: 1.2 }}>{t.features.automate.title}</h3>
               <p style={{ fontSize: "14px", color: "#666", lineHeight: 1.7 }}>{t.features.automate.desc}</p>
@@ -277,7 +428,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Row 3: Workflow full width */}
+        {/* Row 4: Workflow full width */}
         <div style={{ border: "1px solid #ebebeb", borderRadius: "14px", padding: "44px 48px", background: "#fff", textAlign: "left" }}>
           <div style={{ display: "inline-flex", alignItems: "center", background: "#f0f0ee", border: "1px solid #e4e4e0", borderRadius: "20px", padding: "4px 12px", fontSize: "11px", color: "#666", fontWeight: 500, marginBottom: "16px", letterSpacing: ".02em" }}>{t.features.workflow.badge}</div>
           <h3 style={{ fontSize: "20px", fontWeight: 700, letterSpacing: "-.02em", color: "#1a1a1a", marginBottom: "10px", lineHeight: 1.2 }}>{t.features.workflow.title}</h3>
@@ -287,40 +438,38 @@ export default function Home() {
       </section>
 
       {/* Connectors Section */}
-      <section id="connectors" style={{ background: "#f8f8f6", borderTop: "1px solid #ebebeb", borderBottom: "1px solid #ebebeb" }}>
-        <div style={{ maxWidth: "1080px", margin: "0 auto", padding: "80px 24px" }}>
-          <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 700, letterSpacing: "-.03em", lineHeight: 1.1, color: "#1a1a1a", marginBottom: "14px" }}>
-            {t.connectors.title}
-          </h2>
-          <p style={{ fontSize: "15px", color: "#666", lineHeight: 1.7, maxWidth: "560px", marginBottom: "48px" }}>
-            {t.connectors.subtitle}
-          </p>
+      <section id="connectors" style={{ padding: isMobile ? "60px 24px" : "100px 40px", maxWidth: "1080px", margin: "0 auto", textAlign: "center", background: "#f8f8f6", borderTop: "1px solid #ebebeb", borderBottom: "1px solid #ebebeb" }}>
+        <h2 style={{ fontSize: isMobile ? "28px" : "40px", fontWeight: 700, marginBottom: "16px" }}>{t.connectors.title}</h2>
+        <p style={{ color: "#666", marginBottom: "64px", maxWidth: "600px", margin: "0 auto 64px" }}>
+          {t.connectors.subtitle}
+        </p>
 
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(4, 1fr)" : "repeat(8, 1fr)", gap: isMobile ? "24px" : "40px", alignItems: "center" }}>
           <img
             src="https://d2xsxph8kpxj0f.cloudfront.net/310519663472662437/R5T29qL58Covc8v8X9wTZt/GENERALISTAIAGENT(1)_6828e15f.webp"
             alt="Connectors"
-            style={{ width: "100%", height: "auto", display: "block", borderRadius: "12px" }}
+            style={{ width: "100%", height: "auto", display: "block", borderRadius: "12px", gridColumn: isMobile ? "span 4" : "span 8", maxWidth: "800px", margin: "0 auto" }}
           />
+        </div>
 
-          <div style={{ textAlign: "center", marginTop: "24px" }}>
-            <span style={{ fontSize: "13px", color: "#888" }}>
-              {t.connectors.more}
-            </span>
-          </div>
+        <div style={{ textAlign: "center", marginTop: "24px" }}>
+          <span style={{ fontSize: "13px", color: "#888" }}>
+            {t.connectors.more}
+          </span>
         </div>
       </section>
 
-      {/* Built for Real Work Section */}
-      <section style={{ maxWidth: "1080px", margin: "0 auto", padding: "80px 24px" }}>
-        <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 700, letterSpacing: "-.03em", lineHeight: 1.1, color: "#1a1a1a", marginBottom: "14px" }}>
-          {t.realWork.title}<br />
-          {t.realWork.titleLine2}
+      {/* Real Work Section */}
+      <section style={{ maxWidth: "1080px", margin: "0 auto", padding: isMobile ? "60px 24px" : "100px 40px", textAlign: "center" }}>
+        <h2 style={{ fontSize: isMobile ? "32px" : "48px", fontWeight: 800, color: "#1a1a1a", letterSpacing: "-.03em", marginBottom: "16px", lineHeight: 1.1 }}>
+          {t.realWork.title} <br />
+          <span style={{ color: "#aaa", fontWeight: 300 }}>{t.realWork.titleLine2}</span>
         </h2>
-        <p style={{ fontSize: "15px", color: "#666", lineHeight: 1.7, maxWidth: "560px", marginBottom: "32px" }}>
+        <p style={{ fontSize: "16px", color: "#666", marginBottom: "64px" }}>
           {t.realWork.subtitle}
         </p>
 
-        <div style={{ display: "flex", gap: "8px", marginBottom: "32px", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "8px", marginBottom: "32px", flexWrap: "wrap", justifyContent: "center" }}>
           {t.tabs.map((tab: any, idx: number) => (
             <button
               key={idx}
@@ -343,13 +492,13 @@ export default function Home() {
         </div>
 
         {/* Demo Frame */}
-        <div style={{ width: "100%", background: "#fff", border: "1px solid #ebebeb", borderRadius: "14px", overflow: "hidden", boxShadow: "0 4px 32px rgba(0,0,0,.06)" }}>
+        <div style={{ width: "100%", background: "#fff", border: "1px solid #ebebeb", borderRadius: "14px", overflow: "hidden", boxShadow: "0 4px 32px rgba(0,0,0,.06)", textAlign: "left" }}>
           <div style={{ padding: "12px 20px", borderBottom: "1px solid #f0f0f0", display: "flex", alignItems: "center", gap: "8px", background: "#fafafa" }}>
             <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#ff5f57" }}></div>
             <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#febc2e" }}></div>
             <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#28c840" }}></div>
           </div>
-          <div style={{ padding: "24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", minHeight: "320px" }}>
+          <div style={{ padding: "24px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "24px", minHeight: "320px" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <div style={{ padding: "12px 16px", borderRadius: "10px", fontSize: "13px", lineHeight: 1.6, background: "#1a1a1a", color: "#fff", alignSelf: "flex-end", borderBottomRightRadius: "3px", maxWidth: "85%" }}>
                 {t.tabs[activeTab].userMsg}
@@ -405,22 +554,19 @@ export default function Home() {
       </section>
 
       {/* How to Use Section */}
-      <section id="how" style={{ background: "#f8f8f6", borderTop: "1px solid #ebebeb", borderBottom: "1px solid #ebebeb" }}>
-        <div style={{ maxWidth: "1080px", margin: "0 auto", padding: "80px 24px" }}>
-          <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 700, letterSpacing: "-.03em", lineHeight: 1.1, color: "#1a1a1a", marginBottom: "14px" }}>
+      <section id="how" style={{ background: "#f9f9f9", padding: isMobile ? "60px 24px" : "100px 40px" }}>
+        <div style={{ maxWidth: "1080px", margin: "0 auto" }}>
+          <h2 style={{ fontSize: isMobile ? "28px" : "40px", fontWeight: 700, textAlign: "center", marginBottom: "64px" }}>
             {t.how.title}
           </h2>
-          <p style={{ fontSize: "15px", color: "#666", lineHeight: 1.7, maxWidth: "560px", marginBottom: "48px" }}>
-            {t.how.subtitle}
-          </p>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 0, marginTop: "48px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: isMobile ? "40px" : "60px" }}>
             {[
               { num: "01", title: t.how.step1.title, desc: t.how.step1.desc },
               { num: "02", title: t.how.step2.title, desc: t.how.step2.desc },
               { num: "03", title: t.how.step3.title, desc: t.how.step3.desc },
             ].map((step, idx) => (
-              <div key={idx} style={{ padding: "32px 40px 32px 0" }}>
+              <div key={idx} style={{ textAlign: isMobile ? "center" : "left" }}>
                 <div style={{ fontSize: "13px", color: "#bbb", fontWeight: 600, letterSpacing: ".06em", display: "block", marginBottom: "12px" }}>
                   {step.num}
                 </div>
@@ -434,19 +580,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Swarm Section */}
-      <section style={{ background: "#f8f8f6", borderTop: "1px solid #ebebeb" }}>
-        <div style={{ maxWidth: "1080px", margin: "0 auto", padding: "80px 24px" }}>
-          <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 700, letterSpacing: "-.03em", lineHeight: 1.1, color: "#1a1a1a", marginBottom: "14px" }}>
+      {/* Agents Section */}
+      <section id="agents" style={{ background: "#f8f8f6", borderTop: "1px solid #ebebeb", borderBottom: "1px solid #ebebeb" }}>
+        <div style={{ maxWidth: "1080px", margin: "0 auto", padding: isMobile ? "60px 24px" : "80px 40px", textAlign: "center" }}>
+          <h2 style={{ fontSize: isMobile ? "28px" : "40px", fontWeight: 700, color: "#1a1a1a", marginBottom: "16px" }}>
             {t.agents.title}
           </h2>
-          <p style={{ fontSize: "15px", color: "#666", lineHeight: 1.7, maxWidth: "560px", marginBottom: "48px" }}>
+          <p style={{ fontSize: "15px", color: "#666", lineHeight: 1.7, maxWidth: "560px", margin: "0 auto 48px" }}>
             {t.agents.subtitle}
           </p>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "16px", marginTop: "48px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)", gap: "16px" }}>
             {t.agentsList.map((agent: any, idx: number) => (
-              <div key={idx} style={{ background: "#fff", border: "1px solid #ebebeb", borderRadius: "12px", padding: "32px", transition: "all .2s" }}>
+              <div key={idx} style={{ background: "#fff", border: "1px solid #ebebeb", borderRadius: "12px", padding: "32px", transition: "all .2s", textAlign: "left" }}>
                 <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#1a1a1a", marginBottom: "10px", letterSpacing: "-.02em" }}>
                   {agent.title}
                 </h3>
@@ -476,13 +622,13 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section style={{ padding: "80px 24px", textAlign: "center", borderTop: "1px solid #ebebeb" }}>
+      <section style={{ padding: isMobile ? "60px 24px" : "100px 40px", textAlign: "center" }}>
         <div style={{ maxWidth: "1080px", margin: "0 auto" }}>
-          <h2 style={{ fontSize: "clamp(26px,4vw,38px)", fontWeight: 700, letterSpacing: "-.03em", lineHeight: 1.1, color: "#1a1a1a", marginBottom: "48px" }}>
+          <h2 style={{ fontSize: isMobile ? "28px" : "40px", fontWeight: 700, color: "#1a1a1a", marginBottom: "64px" }}>
             {t.faq.title}
           </h2>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "24px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(2,1fr)", gap: "24px" }}>
             {t.faqsList.map((faq: any, idx: number) => (
               <div key={idx} style={{ textAlign: "left", background: "#f8f8f6", border: "1px solid #ebebeb", borderRadius: "12px", padding: "24px" }}>
                 <h3 style={{ fontSize: "15px", fontWeight: 700, color: "#1a1a1a", marginBottom: "12px" }}>
@@ -496,17 +642,17 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section style={{ padding: "80px 24px", textAlign: "center", borderTop: "1px solid #ebebeb" }}>
-        <div style={{ maxWidth: "1080px", margin: "0 auto" }}>
-          <h2 style={{ fontSize: "clamp(48px,10vw,96px)", fontWeight: 800, letterSpacing: "-.04em", color: "#1a1a1a", lineHeight: 1, marginBottom: "8px" }}>
-            Talos
+      <section style={{ padding: isMobile ? "80px 24px" : "120px 40px", textAlign: "center", background: "#f8f8f6", borderTop: "1px solid #ebebeb" }}>
+        <div style={{ maxWidth: "720px", margin: "0 auto" }}>
+          <h2 style={{ fontSize: isMobile ? "32px" : "44px", fontWeight: 800, color: "#1a1a1a", letterSpacing: "-.04em", lineHeight: 1.1 }}>
+            {t.cta.tagline}
           </h2>
           <p style={{ fontSize: "14px", color: "#aaa", marginTop: "8px", letterSpacing: ".04em", textTransform: "uppercase", fontWeight: 500 }}>
-            {t.cta.tagline}
+            Intent to Action
           </p>
 
           <form onSubmit={handleSubmit} style={{ marginTop: "40px", display: "flex", justifyContent: "center" }}>
-            <div style={{ display: "flex", border: "1.5px solid #e4e4e0", borderRadius: "10px", overflow: "hidden", width: "100%", maxWidth: "420px", background: "#fff", transition: "border-color .2s, box-shadow .2s" }}>
+            <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", border: isMobile ? "none" : "1.5px solid #e4e4e0", borderRadius: "10px", overflow: "hidden", width: "100%", maxWidth: "420px", background: isMobile ? "transparent" : "#fff", gap: isMobile ? "12px" : "0" }}>
               <input
                 type="email"
                 placeholder={t.cta.placeholder}
@@ -514,13 +660,14 @@ export default function Home() {
                 onChange={(e) => setEmail(e.target.value)}
                 style={{
                   flex: 1,
-                  border: "none",
+                  border: isMobile ? "1.5px solid #e4e4e0" : "none",
                   outline: "none",
-                  padding: "12px 18px",
+                  padding: "14px 18px",
                   fontSize: "14px",
                   color: "#1a1a1a",
                   fontFamily: "'Inter', sans-serif",
-                  background: "transparent",
+                  background: "#fff",
+                  borderRadius: isMobile ? "10px" : "0",
                 }}
               />
               <button
@@ -529,13 +676,13 @@ export default function Home() {
                   background: "#1a1a1a",
                   color: "#fff",
                   border: "none",
-                  padding: "12px 20px",
-                  fontSize: "13px",
+                  padding: "14px 24px",
+                  fontSize: "14px",
                   fontWeight: 600,
                   cursor: "pointer",
                   fontFamily: "'Inter', sans-serif",
                   transition: "opacity .2s",
-                  whiteSpace: "nowrap",
+                  borderRadius: isMobile ? "10px" : "0",
                 }}
               >
                 {t.cta.button}
@@ -544,9 +691,7 @@ export default function Home() {
           </form>
 
           {errorMsg && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#dc2626", fontWeight: 500, padding: "11px 20px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "8px", marginTop: "12px", justifyContent: "center", maxWidth: "420px", margin: "12px auto 0" }}>
-              ⚠ {errorMsg}
-            </div>
+            <p style={{ color: "#ff4d4d", fontSize: "13px", marginTop: "12px", fontWeight: 500 }}>{errorMsg}</p>
           )}
 
           <p style={{ fontSize: "12px", color: "#aaa", textAlign: "center", marginTop: "24px" }}>
@@ -556,67 +701,59 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer style={{ background: "#fff", borderTop: "1px solid #ebebeb", padding: "80px 24px" }}>
-        <div style={{ maxWidth: "1080px", margin: "0 auto", marginBottom: "48px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "48px" }}>
-            <div>
-              <div style={{ fontSize: "16px", fontWeight: 700, color: "#1a1a1a", marginBottom: "12px" }}>
-                Talos
-              </div>
-              <div style={{ fontSize: "13px", color: "#666", lineHeight: 1.7, marginBottom: "16px" }}>
-                {t.hero.tagline}<br />
-                {t.footer.tagline}
-              </div>
-              <div style={{ display: "flex", gap: "12px" }}>
-                {["𝕏", "in", "⌥"].map((icon, idx) => (
-                  <div key={idx} style={{ fontSize: "16px", cursor: "pointer" }}>
-                    {icon}
-                  </div>
-                ))}
-              </div>
+      <footer style={{ borderTop: "1px solid #f0f0f0", padding: isMobile ? "60px 24px" : "80px 40px" }}>
+        <div style={{ maxWidth: "1080px", margin: "0 auto", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr 1fr 1fr", gap: "48px" }}>
+          <div>
+            <span style={{ fontWeight: 800, fontSize: "22px", color: "#1a1a1a", letterSpacing: "-0.04em", display: "block", marginBottom: "16px" }}>Talos</span>
+            <p style={{ color: "#888", fontSize: "14px", lineHeight: 1.6, maxWidth: "240px", textAlign: "left" }}>{t.footer.tagline}</p>
+            <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
+              {["𝕏", "LinkedIn", "GitHub"].map((icon, idx) => (
+                <div key={idx} style={{ fontSize: "16px", cursor: "pointer", color: "#1a1a1a" }}>
+                  {icon}
+                </div>
+              ))}
             </div>
-            <div>
-              <div style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a1a", marginBottom: "16px", textTransform: "uppercase", letterSpacing: ".04em" }}>
-                {t.footer.product}
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {["Features", "Connectors", "Pricing", "Changelog"].map((item, idx) => (
-                  <a key={idx} href="#" style={{ fontSize: "13px", color: "#666", textDecoration: "none", transition: "color .2s" }}>
-                    {item}
-                  </a>
-                ))}
-              </div>
+          </div>
+          
+          <div style={{ textAlign: "left" }}>
+            <div style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a1a", marginBottom: "16px", textTransform: "uppercase", letterSpacing: ".04em" }}>
+              {t.footer.product}
             </div>
-            <div>
-              <div style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a1a", marginBottom: "16px", textTransform: "uppercase", letterSpacing: ".04em" }}>
-                {t.footer.resources}
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {["Documentation", "API", "Talos Campus", "Blog"].map((item, idx) => (
-                  <a key={idx} href="#" style={{ fontSize: "13px", color: "#666", textDecoration: "none", transition: "color .2s" }}>
-                    {item}
-                  </a>
-                ))}
-              </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {["Features", "Connectors", "Changelog"].map((item) => (
+                <a key={item} href="#" style={{ fontSize: "13px", color: "#666", textDecoration: "none" }}>{item}</a>
+              ))}
             </div>
-            <div>
-              <div style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a1a", marginBottom: "16px", textTransform: "uppercase", letterSpacing: ".04em" }}>
-                {t.footer.company}
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {["About", "Careers", "Privacy", "Terms"].map((item, idx) => (
-                  <a key={idx} href="#" style={{ fontSize: "13px", color: "#666", textDecoration: "none", transition: "color .2s" }}>
-                    {item}
-                  </a>
-                ))}
-              </div>
+          </div>
+
+          <div style={{ textAlign: "left" }}>
+            <div style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a1a", marginBottom: "16px", textTransform: "uppercase", letterSpacing: ".04em" }}>
+              {t.footer.resources}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {["Documentation", "API", "Blog"].map((item) => (
+                <a key={item} href="#" style={{ fontSize: "13px", color: "#666", textDecoration: "none" }}>{item}</a>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ textAlign: "left" }}>
+            <div style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a1a", marginBottom: "16px", textTransform: "uppercase", letterSpacing: ".04em" }}>
+              {t.footer.company}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {["About", "Careers", "Privacy", "Terms"].map((item) => (
+                <a key={item} href="#" style={{ fontSize: "13px", color: "#666", textDecoration: "none" }}>{item}</a>
+              ))}
             </div>
           </div>
         </div>
 
-        <div style={{ borderTop: "1px solid #ebebeb", paddingTop: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px", color: "#888" }}>
+        <div style={{ maxWidth: "1080px", margin: "64px auto 0", paddingTop: "32px", borderTop: "1px solid #f0f0f0", display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "center" : "flex-start", gap: "16px", color: "#aaa", fontSize: "12px" }}>
           <span>{t.footer.rights}</span>
-          <span>{t.footer.team}</span>
+          <div style={{ display: "flex", gap: "24px" }}>
+            <span>{t.footer.team}</span>
+          </div>
         </div>
       </footer>
 
@@ -632,6 +769,10 @@ export default function Home() {
         @keyframes overlayFadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
+        }
+        @keyframes mobileMenuSlideIn {
+          from { transform: translateY(-10px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
       `}</style>
 
